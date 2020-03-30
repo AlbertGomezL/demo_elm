@@ -9,13 +9,13 @@ import Browser exposing (..)
 
 type alias Tema = 
     { titulo : String
-    , duracion : String
+    , duracion : Int
     , id : Int
     }
 
 type alias Model = List Tema
 
-nuevoTema : String -> String -> Int -> Tema
+nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id = 
     { titulo = titulo
     , duracion = duracion
@@ -24,16 +24,20 @@ nuevoTema titulo duracion id =
 
 modeloInicial : Model
 modeloInicial = 
-    [ nuevoTema "1. Introduccion" "5" 1
-    , nuevoTema "2. Tema1" "7" 4
-    , nuevoTema "9. Cierre" "4" 2
-    , nuevoTema "6. Otro tema más" "10" 3
+    [ nuevoTema "1. Introduccion" 5 1
+    , nuevoTema "2. Tema1" 7 4
+    , nuevoTema "9. Cierre" 4 2
+    , nuevoTema "6. Otro tema más" 10 3
     ]
 
 
 -- UPDATE
 
-type Msg = NoOp | SortByTitulo | SortByDuracion
+type Msg 
+    = NoOp 
+    | SortByTitulo 
+    | SortByDuracion
+    | Delete Int
 
 update: Msg -> Model -> Model
 update action model =
@@ -44,6 +48,8 @@ update action model =
             List.sortBy .titulo model
         SortByDuracion ->
             List.sortBy .duracion model            
+        Delete id ->
+            List.filter (\t -> t.id /= id) model
 
 
 -- VIEW
@@ -59,14 +65,15 @@ pageFooter =
           [text "Generador de temarios"]
     ]
 
-capitulo : Tema -> Html msg
+capitulo : Tema -> Html Msg
 capitulo cap = 
-    li [] [
-        span [class "titulo"] [text cap.titulo],
-        span [class "duracion"] [text cap.duracion]
+    li [] 
+    [ span [class "titulo"] [text cap.titulo]
+    , span [class "duracion"] [text (String.fromInt cap.duracion)]
+    , button [class "delete", onClick (Delete cap.id)][text "x"]
     ]
 
-capitulos : List Tema -> Html msg
+capitulos : List Tema -> Html Msg
 capitulos temas =
     ul [] (List.map capitulo temas)
 
