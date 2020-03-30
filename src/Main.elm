@@ -54,6 +54,13 @@ update action model =
 
 -- VIEW
 
+totalDuraciones : List Tema -> Int
+totalDuraciones temas =
+    let
+        duraciones = List.map .duracion temas
+    in
+        List.foldl (+) 0 duraciones
+
 pageHeader : Html msg
 pageHeader = 
     h1 [] [text "Temario"]
@@ -70,12 +77,23 @@ capitulo cap =
     li [] 
     [ span [class "titulo"] [text cap.titulo]
     , span [class "duracion"] [text (String.fromInt cap.duracion)]
-    , button [class "delete", onClick (Delete cap.id)][text "x"]
+    , button [class "delete", onClick (Delete cap.id)] [text "x"]
     ]
 
 capitulos : List Tema -> Html Msg
 capitulos temas =
-    ul [] (List.map capitulo temas)
+    let
+        entradas = List.map capitulo temas
+        elementos = entradas ++ [muestraTotal (totalDuraciones temas)]
+    in
+        ul [] elementos
+
+muestraTotal : Int -> Html msg
+muestraTotal total =
+    li [class "total"]
+        [ span [class "label"] [text "Total"]
+        , span [class "duracion"] [text (String.fromInt total)]
+        ]
 
 view : Model -> Html Msg
 view model = 
