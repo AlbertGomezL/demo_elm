@@ -7,27 +7,27 @@ import Browser exposing (..)
 
 -- MODEL
 
-type alias Tema = 
-    { titulo : String
-    , duracion : Int
-    , id : Int
+type alias Product = 
+    { id : Int
+    , name : String
+    , cost : Float
     }
 
-type alias Model = List Tema
+type alias Model = List Product
 
-nuevoTema : String -> Int -> Int -> Tema
-nuevoTema titulo duracion id = 
-    { titulo = titulo
-    , duracion = duracion
-    , id = id
+newProduct : Int -> String -> Float -> Product
+newProduct id name cost = 
+    { id = id
+    , name = name
+    , cost = cost
     }
 
-modeloInicial : Model
-modeloInicial = 
-    [ nuevoTema "1. Introduccion" 5 1
-    , nuevoTema "2. Tema1" 7 4
-    , nuevoTema "9. Cierre" 4 2
-    , nuevoTema "6. Otro tema más" 10 3
+initModel : Model
+initModel = 
+    [ newProduct 1 "Tuercas" 5.5
+    , newProduct 4 "Martillo" 7.0
+    , newProduct 2 "Tornillos" 4.2
+    , newProduct 3 "Rastrillo" 10
     ]
 
 
@@ -35,8 +35,8 @@ modeloInicial =
 
 type Msg 
     = NoOp 
-    | SortByTitulo 
-    | SortByDuracion
+    | SortByNombre
+    | SortByPrecio
     | Delete Int
 
 update: Msg -> Model -> Model
@@ -44,55 +44,55 @@ update action model =
     case action of
         NoOp ->
             model
-        SortByTitulo ->
-            List.sortBy .titulo model
-        SortByDuracion ->
-            List.sortBy .duracion model            
+        SortByNombre ->
+            List.sortBy .name model
+        SortByPrecio ->
+            List.sortBy .cost model            
         Delete id ->
             List.filter (\t -> t.id /= id) model
 
 
 -- VIEW
 
-totalDuraciones : List Tema -> Int
-totalDuraciones temas =
+totalCost : List Product -> Float
+totalCost products =
     let
-        duraciones = List.map .duracion temas
+        costs = List.map .cost products
     in
-        List.foldl (+) 0 duraciones
+        List.foldl (+) 0 costs
 
 pageHeader : Html msg
 pageHeader = 
-    h1 [] [text "Temario"]
+    h1 [] [text "App Products"]
 
 pageFooter : Html msg
 pageFooter = 
     footer [] [
         a [href "https://www.google.es"]
-          [text "Generador de temarios"]
+          [text "Aplicación de compra de products"]
     ]
 
-capitulo : Tema -> Html Msg
-capitulo cap = 
+article : Product -> Html Msg
+article art = 
     li [] 
-    [ span [class "titulo"] [text cap.titulo]
-    , span [class "duracion"] [text (String.fromInt cap.duracion)]
-    , button [class "delete", onClick (Delete cap.id)] [text "x"]
+    [ span [class "name"] [text art.name]
+    , span [class "cost"] [text (String.fromFloat art.cost)]
+    , button [class "delete", onClick (Delete art.id)] [text "x"]
     ]
 
-capitulos : List Tema -> Html Msg
-capitulos temas =
+articles : List Product -> Html Msg
+articles products =
     let
-        entradas = List.map capitulo temas
-        elementos = entradas ++ [muestraTotal (totalDuraciones temas)]
+        entries = List.map article products
+        elements = entries ++ [showTotal (totalCost products)]
     in
-        ul [] elementos
+        ul [] elements
 
-muestraTotal : Int -> Html msg
-muestraTotal total =
+showTotal : Float -> Html msg
+showTotal total =
     li [class "total"]
         [ span [class "label"] [text "Total"]
-        , span [class "duracion"] [text (String.fromInt total)]
+        , span [class "cost"] [text (String.fromFloat total)]
         ]
 
 view : Model -> Html Msg
@@ -100,12 +100,12 @@ view model =
     div [id "container"] 
         [ pageHeader
         , button
-            [class "sort left", onClick SortByTitulo]
-            [text "Titulo"]
+            [class "sort left", onClick SortByNombre]
+            [text "Nombre"]
         , button
-            [class "sort", onClick SortByDuracion]
-            [text "Duracion"]
-        , capitulos model
+            [class "sort", onClick SortByPrecio]
+            [text "Precio"]
+        , articles model
         , pageFooter
         ]
 
@@ -113,11 +113,11 @@ view model =
 -- main : Html msg
 main = 
     Browser.sandbox 
-    { init = update SortByTitulo modeloInicial
+    { init = update SortByNombre initModel
     , view = view
     , update = update
     }
-    -- view modeloInicial
+    -- view initModel
     -- Html.text "Hola mundo!"
 
 
